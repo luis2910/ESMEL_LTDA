@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Registro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% load static %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+  <style>
+    .auth-hero {
+      position: relative;
+      min-height: 50vh;
+      display: grid;
+      align-items: center;
+      padding: 48px 0;
+      color: #fff;
+      background: linear-gradient(115deg, rgba(0,21,97,0.92), rgba(0,21,97,0.65)), url("{% static 'menu/img/caldera2.jpg' %}") center/cover no-repeat;
+      overflow: hidden;
+    }
+    .auth-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.14), transparent 45%);
+      pointer-events: none;
+    }
+    .auth-card {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+    }
+  </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+{% include 'menu/partials/navbar.html' %}
+
+<main class="flex-grow-1">
+  <section class="auth-hero">
+    <div class="container text-center position-relative">
+      <p class="text-uppercase small mb-2">Registro</p>
+      <h1 class="display-6 fw-semibold mb-0">Crea tu cuenta</h1>
+    </div>
+  </section>
+
+<section id="registro" class="container my-5" style="max-width: 820px;">
+  <div class="auth-card bg-white p-4">
+  <h2 class="text-center mb-4">Crear Cuenta</h2>
+
+  <form id="formRegistro" method="post" action="{% url 'registro' %}" novalidate>
+    {% csrf_token %}
+    {% if messages %}
+      <div class="mb-3">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-2 mb-2" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ form.non_field_errors|striptags }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+      </div>
+    {% endif %}
+    <p class="text-danger small" id="registroWarnings" style="display:none;"></p>
+
+    <div class="mt-3">
+      <h3 class="h6 text-muted mb-2">Datos de registro</h3>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="id_first_name" class="form-label">Primer Nombre</label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}
+            <div class="text-danger small">{{ form.first_name.errors|striptags }}</div>
+          {% endif %}
+        </div>
+        <div class="col-md-6">
+          <label for="id_last_name" class="form-label">Apellido Paterno</label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}
+            <div class="text-danger small">{{ form.last_name.errors|striptags }}</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-md-6">
+          <label for="id_rut" class="form-label">RUT</label>
+          {{ form.rut }}
+          {% if form.rut.errors %}
+            <div class="text-danger small">{{ form.rut.errors|striptags }}</div>
+          {% endif %}
+        </div>
+        <div class="col-md-6">
+          <label for="id_fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
+          {{ form.fecha_nacimiento }}
+          {% if form.fecha_nacimiento.errors %}
+            <div class="text-danger small">{{ form.fecha_nacimiento.errors|striptags }}</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-md-6">
+          <label for="id_email" class="form-label">Correo electronico</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="text-danger small">{{ form.email.errors|striptags }}</div>
+          {% endif %}
+        </div>
+        <div class="col-md-6">
+          <label for="id_telefono" class="form-label">Telefono</label>
+          {{ form.telefono }}
+          {% if form.telefono.errors %}
+            <div class="text-danger small">{{ form.telefono.errors|striptags }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+      <div class="col-md-6">
+        <label for="id_password1" class="form-label">Contrasena</label>
+        {{ form.password1 }}
+        {% if form.password1.errors %}
+          <div class="text-danger small">{{ form.password1.errors|striptags }}</div>
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        <label for="id_password2" class="form-label">Confirmar contrasena</label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}
+          <div class="text-danger small">{{ form.password2.errors|striptags }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <div class="form-check">
+        {{ form.acepta_privacidad }}
+        <label class="form-check-label" for="id_acepta_privacidad">Acepto la politica de privacidad</label>
+        {% if form.acepta_privacidad.errors %}
+          <div class="text-danger small">{{ form.acepta_privacidad.errors|striptags }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <button type="submit" id="registrar" class="btn btn-primary w-100 mt-3">Registrarme</button>
+  </form>
+  </div>
+</section>
+</main>
+
+{% include 'menu/partials/footer.html' %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function() {
+  const form = document.getElementById('formRegistro');
+  if (!form) return;
+
+  const emailInput = document.getElementById('id_email');
+  const password1 = document.getElementById('id_password1');
+  const password2 = document.getElementById('id_password2');
+  const rutInput = document.getElementById('id_rut');
+  const warningBox = document.getElementById('registroWarnings');
+  const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  const rutRe = /^\d{7,8}-?[0-9kK]$/;
+
+  form.addEventListener('submit', function(e) {
+    let ok = true;
+    const mark = (el, msg) => {
+      if (!el) return;
+      el.classList.add('is-invalid');
+      let fb = el.parentElement.querySelector('.invalid-feedback');
+      if (!fb) {
+        fb = document.createElement('div');
+        fb.className = 'invalid-feedback d-block';
+        el.parentElement.appendChild(fb);
+      }
+      fb.textContent = msg;
+      ok = false;
+    };
+    const clear = (el) => {
+      if (!el) return;
+      el.classList.remove('is-invalid');
+      const fb = el.parentElement.querySelector('.invalid-feedback');
+      if (fb) fb.textContent = '';
+    };
+
+    [emailInput, password1, password2, rutInput].forEach(clear);
+
+    if (!emailInput || !emailRe.test((emailInput.value || '').trim())) {
+      mark(emailInput, 'Ingresa un correo valido.');
+    }
+    if (password1 && password2) {
+      const p1 = password1.value || '';
+      const p2 = password2.value || '';
+      if (p1.length < 8) mark(password1, 'Minimo 8 caracteres.');
+      if (p1 !== p2) mark(password2, 'Las contrasenas deben coincidir.');
+    }
+    if (rutInput && rutInput.value && !rutRe.test(rutInput.value.trim())) {
+      mark(rutInput, 'RUT debe ser 8 numeros y DV (ej: 11111111-1).');
+    }
+
+    if (!ok) {
+      e.preventDefault();
+      if (warningBox) {
+        warningBox.textContent = 'Revisa los campos marcados en rojo.';
+        warningBox.style.display = 'block';
+      }
+      const firstInvalid = form.querySelector('.is-invalid');
+      if (firstInvalid) firstInvalid.focus();
+    } else if (warningBox) {
+      warningBox.style.display = 'none';
+      warningBox.textContent = '';
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+  <style>
+    :root {
+      --contact-primary: var(--brand-blue, #001561);
+      --contact-ink: #0b1f3a;
+      --contact-soft: #eaf1ff;
+    }
+    body { background-color: #f5f7fb; }
+    .contact-hero {
+      position: relative;
+      min-height: 320px;
+      display: grid;
+      align-items: center;
+      padding: 80px 0;
+      color: #fff;
+      background: linear-gradient(120deg, rgba(0,21,97,0.9), rgba(0,21,97,0.55)), url("{% static 'menu/img/caldera1.jpg' %}") center/cover no-repeat;
+      overflow: hidden;
+    }
+    .contact-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 18% 22%, rgba(255,255,255,0.18), transparent 45%);
+      pointer-events: none;
+    }
+    .breadcrumb-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.24);
+      font-weight: 600;
+    }
+    .hero-subtitle { max-width: 740px; opacity: 0.92; }
+    .hero-actions { gap: 12px; }
+    .hero-actions .btn-outline-light { border-color: rgba(255,255,255,0.7); color: #fff; }
+    .section-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--contact-soft);
+      color: var(--contact-primary);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+    .info-card {
+      background: #fff;
+      border: 1px solid #e6ebf5;
+      border-radius: 16px;
+      padding: 22px;
+      text-align: center;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.06);
+      height: 100%;
+    }
+    .icon-ring {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,21,97,0.08);
+      color: var(--contact-primary);
+      margin-bottom: 12px;
+    }
+    .info-card h3 { color: var(--contact-ink); font-size: 1.1rem; }
+    .info-card p { margin: 0; color: #4b5563; }
+    .contact-form-band {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.96)), url("{% static 'menu/img/caldera2.jpg' %}") center/cover no-repeat;
+      padding: 64px 0 80px;
+    }
+    .contact-form-card {
+      background: rgba(255,255,255,0.98);
+      border: 1px solid #e4e8f1;
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 18px 36px rgba(0,0,0,0.08);
+    }
+    @media (min-width: 768px) {
+      .contact-form-card { padding: 36px; }
+    }
+    .contact-form-card h2 { color: var(--contact-ink); }
+    .contact-form-card .btn-primary {
+      --bs-btn-bg: var(--contact-primary);
+      --bs-btn-border-color: var(--contact-primary);
+      --bs-btn-hover-bg: #021f7a;
+      --bs-btn-hover-border-color: #021f7a;
+      --bs-btn-focus-shadow-rgb: 0, 21, 97;
+    }
+    .contact-form-card .form-check-label { font-size: 0.96rem; }
+  </style>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+  {% include 'menu/partials/navbar.html' %}
+  {% include 'menu/partials/messages.html' %}
+
+  <main class="flex-grow-1">
+    <section class="contact-hero">
+      <div class="container position-relative">
+        <div class="breadcrumb-pill mb-3">
+          <a href="{% url 'index' %}" class="text-white text-decoration-none">Inicio</a>
+          <span class="text-white-50">/</span>
+          <span class="text-white">Contacto</span>
+        </div>
+        <h1 class="display-5 fw-bold mb-3">Hablemos de tu proyecto</h1>
+        <p class="lead hero-subtitle mb-4">Servicios de mantenimiento para salas de bombas, calderas y climatización. Coordinamos visitas en Santiago y regiones.</p>
+        <div class="hero-actions d-flex flex-wrap">
+          <a href="tel:+56932005633" class="btn btn-light btn-lg fw-semibold">Llamar ahora</a>
+          <a href="mailto:fmella.fmservicios@gmail.com" class="btn btn-outline-light btn-lg fw-semibold">Escr&iacute;benos</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="container py-5">
+      <div class="text-center mb-5">
+        <div class="section-eyebrow mb-3">Atenci&oacute;n personalizada</div>
+        <h2 class="fw-bold mb-3" style="color: var(--contact-ink);">Servicio para salas de calderas, bombas y climatización</h2>
+        <p class="text-muted mb-0">Coordinamos visitas, mantenimientos y emergencias en Santiago y regiones. Confirmamos disponibilidad y horario estimado al recibir tu solicitud.</p>
+      </div>
+      <div class="row g-4 justify-content-center">
+        <div class="col-12 col-sm-6 col-lg-4">
+          <div class="info-card">
+            <span class="icon-ring">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 13 13 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 13 13 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </span>
+            <h3 class="mb-1">Ll&aacute;manos</h3>
+            <p class="fw-semibold">+56 9 3200 5633</p>
+            <p class="text-muted small">Emergencias 24/7</p>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+          <div class="info-card">
+            <span class="icon-ring">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+            </span>
+            <h3 class="mb-1">Correo</h3>
+            <p class="fw-semibold">fmella.fmservicios@gmail.com</p>
+            <p class="text-muted small">Respondemos en menos de 24h</p>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+          <div class="info-card">
+            <span class="icon-ring">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.686-6-10a6 6 0 1 1 12 0c0 4.314-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg>
+            </span>
+            <h3 class="mb-1">Ubicaci&oacute;n</h3>
+            <p class="fw-semibold">Santiago, Chile</p>
+            <p class="text-muted small">Coordinamos visitas en todo el pa&iacute;s</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-form-band">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-12 col-lg-10 col-xl-9">
+            <div class="contact-form-card">
+              <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                <div>
+                  <p class="text-uppercase text-muted small mb-1 fw-semibold">Solicita tu cotizaci&oacute;n</p>
+                  <h2 class="h4 mb-0">Cu&eacute;ntanos qué necesitas</h2>
+                  <p class="text-muted mb-0">Detalla el servicio, la ubicaci&oacute;n y si corresponde a una emergencia.</p>
+                </div>
+              </div>
+              <form method="post" class="row g-3" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="col-12">
+                  <div class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+                    {{ form.non_field_errors|striptags }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                  </div>
+                </div>
+                {% endif %}
+
+                <div class="col-md-6">
+                  <label class="form-label" for="id_nombre">Nombre</label>
+                  {{ form.nombre }}
+                  {% if form.nombre.errors %}<div class="text-danger small">{{ form.nombre.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="id_apellido">Apellido</label>
+                  {{ form.apellido }}
+                  {% if form.apellido.errors %}<div class="text-danger small">{{ form.apellido.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="id_email">Correo electr&oacute;nico</label>
+                  {{ form.email }}
+                  {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="id_telefono">Tel&eacute;fono</label>
+                  {{ form.telefono }}
+                  {% if form.telefono.errors %}<div class="text-danger small">{{ form.telefono.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="id_asunto">Asunto</label>
+                  {{ form.asunto }}
+                  {% if form.asunto.errors %}<div class="text-danger small">{{ form.asunto.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="id_tipo_servicio">Tipo de servicio</label>
+                  {{ form.tipo_servicio }}
+                  {% if form.tipo_servicio.errors %}<div class="text-danger small">{{ form.tipo_servicio.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="id_lugar_servicio">Lugar donde se realizar&aacute;</label>
+                  {{ form.lugar_servicio }}
+                  {% if form.lugar_servicio.errors %}<div class="text-danger small">{{ form.lugar_servicio.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="id_region">Regi&oacute;n</label>
+                  {{ form.region }}
+                  {% if form.region.errors %}<div class="text-danger small">{{ form.region.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="id_comuna">Comuna</label>
+                  {{ form.comuna }}
+                  {% if form.comuna.errors %}<div class="text-danger small">{{ form.comuna.errors|striptags }}</div>{% endif %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="id_mensaje">Mensaje</label>
+                  {{ form.mensaje }}
+                  {% if form.mensaje.errors %}<div class="text-danger small">{{ form.mensaje.errors|striptags }}</div>{% endif %}
+                </div>
+
+                <div class="col-12">
+                  <div class="form-check">
+                    {{ form.acepta_privacidad }}
+                    <label class="form-check-label" for="id_acepta_privacidad">Acepto la pol&iacute;tica de privacidad</label>
+                  </div>
+                  {% if form.acepta_privacidad.errors %}<div class="text-danger small">{{ form.acepta_privacidad.errors|striptags }}</div>{% endif %}
+                </div>
+
+                <div class="col-12 text-center pt-2">
+                  <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold">Enviar mensaje</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {% include 'menu/partials/footer.html' %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (function(){
+      var regionesData = {};
+      try { regionesData = JSON.parse('{{ regiones_json|escapejs }}'); } catch (_) {}
+      var regionSelect = document.getElementById("id_region");
+      var comunaSelect = document.getElementById("id_comuna");
+      function renderComunas(region, selected) {
+        if (!comunaSelect) return;
+        var key = (region || "").trim();
+        var options = regionesData[key] || [];
+        comunaSelect.innerHTML = '<option value="">Selecciona comuna</option>';
+        comunaSelect.disabled = !key;
+        options.forEach(function(nombre){
+          var opt = document.createElement("option");
+          opt.value = nombre;
+          opt.textContent = nombre;
+          if (nombre === selected) {
+            opt.selected = true;
+          }
+          comunaSelect.appendChild(opt);
+        });
+      }
+      if (regionSelect && comunaSelect) {
+        var initial = comunaSelect.getAttribute("data-initial") || comunaSelect.value || "";
+        renderComunas(regionSelect.value, initial);
+        regionSelect.addEventListener("change", function(){
+          renderComunas(this.value, "");
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

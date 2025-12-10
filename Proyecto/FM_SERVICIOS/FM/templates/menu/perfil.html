@@ -1,0 +1,184 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Mi Perfil - FM SERVICIOS GENERALES</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+  {% include 'menu/partials/navbar.html' %}
+
+  <section class="container my-5">
+    <div class="row g-4">
+      <div class="col-lg-4 col-xl-3">
+        <div class="bg-white rounded shadow-sm p-4 h-100">
+          <p class="text-muted small mb-2">&iexcl;Hola {{ request.user.first_name }} {{ request.user.last_name }}!</p>
+          <div class="d-flex flex-column align-items-center text-center">
+            <div class="rounded-circle bg-secondary bg-opacity-25 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 96px; height: 96px; font-size: 32px;">
+              {{ request.user.first_name|default:""|slice:":1"|upper }}{{ request.user.last_name|default:""|slice:":1"|upper }}
+            </div>
+          </div>
+          <div class="list-group list-group-flush mt-4">
+            <a href="{% url 'cotizacion_mis' %}" class="list-group-item list-group-item-action d-flex align-items-center gap-2">
+              <i class="bi bi-box-seam fs-5 text-primary"></i>
+              <span>Mis cotizaciones</span>
+            </a>
+            <a href="{% url 'perfil' %}" class="list-group-item list-group-item-action d-flex align-items-center gap-2 active">
+              <i class="bi bi-person fs-5"></i>
+              <span>Mi perfil</span>
+            </a>
+            <a href="{% url 'perfil_editar' %}#seguridad" class="list-group-item list-group-item-action d-flex align-items-center gap-2">
+              <i class="bi bi-shield-lock fs-5"></i>
+              <span>Mi contrase&ntilde;a</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8 col-xl-9">
+        <div class="bg-white p-4 p-md-5 rounded shadow-sm h-100">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+            <div>
+              <h4 class="mb-1">Perfil</h4>
+              <p class="text-muted mb-0">Aqu&iacute; encontrar&aacute;s tus datos personales</p>
+            </div>
+            <div class="d-flex gap-2">
+              <a class="btn btn-outline-primary" href="{% url 'perfil_editar' %}#perfil">Editar datos</a>
+              <button class="btn btn-outline-success" type="button" data-bs-toggle="collapse" data-bs-target="#empresaForm" aria-expanded="{% if empresa_form_open %}true{% else %}false{% endif %}">
+                {% if has_company %}Editar empresa{% else %}Agregar empresa{% endif %}
+              </button>
+              <a class="btn btn-outline-secondary" href="{% url 'perfil_editar' %}#seguridad">Gestionar contrase&ntilde;a</a>
+            </div>
+          </div>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <div class="collapse {% if empresa_form_open %}show{% endif %} border rounded-4 p-3 p-md-4 mb-4" id="empresaForm">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <h5 class="mb-0">{% if has_company %}Editar empresa{% else %}Agregar empresa{% endif %}</h5>
+              <i class="bi bi-building-add text-primary"></i>
+            </div>
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="update_company">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label small text-uppercase text-muted mb-1">Nombre empresa</label>
+                  {{ company_form.empresa_nombre }}
+                  {% if company_form.empresa_nombre.errors %}
+                    <div class="text-danger small">{{ company_form.empresa_nombre.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small text-uppercase text-muted mb-1">RUT empresa</label>
+                  {{ company_form.empresa_rut }}
+                  {% if company_form.empresa_rut.errors %}
+                    <div class="text-danger small">{{ company_form.empresa_rut.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small text-uppercase text-muted mb-1">Encargado</label>
+                  {{ company_form.empresa_encargado }}
+                  {% if company_form.empresa_encargado.errors %}
+                    <div class="text-danger small">{{ company_form.empresa_encargado.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small text-uppercase text-muted mb-1">RUT encargado</label>
+                  {{ company_form.empresa_encargado_rut }}
+                  {% if company_form.empresa_encargado_rut.errors %}
+                    <div class="text-danger small">{{ company_form.empresa_encargado_rut.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label small text-uppercase text-muted mb-1">Ubicaci&oacute;n</label>
+                  {{ company_form.empresa_ubicacion }}
+                  {% if company_form.empresa_ubicacion.errors %}
+                    <div class="text-danger small">{{ company_form.empresa_ubicacion.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-success" type="submit">Guardar empresa</button>
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#empresaForm">Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="border rounded-4 p-3 p-md-4 mb-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <h5 class="mb-0">Datos personales</h5>
+              <i class="bi bi-person-vcard text-primary"></i>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small text-uppercase text-muted mb-1">Nombre</label>
+                <div class="form-control bg-light">{{ request.user.first_name|default:'-' }}</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-uppercase text-muted mb-1">Apellido</label>
+                <div class="form-control bg-light">{{ request.user.last_name|default:'-' }}</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-uppercase text-muted mb-1">Correo</label>
+                <div class="form-control bg-light text-truncate" title="{{ request.user.email }}">{{ request.user.email|default:'-' }}</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-uppercase text-muted mb-1">RUT</label>
+                <div class="form-control bg-light">{{ request.user.rut|default:'-' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="border rounded-4 p-3 p-md-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <h5 class="mb-0">Datos de empresa</h5>
+              <i class="bi bi-building text-primary"></i>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small text-uppercase text-muted mb-1">Nombre empresa</label>
+                <div class="form-control bg-light">{{ request.user.empresa_nombre|default:'-' }}</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-uppercase text-muted mb-1">RUT empresa</label>
+                <div class="form-control bg-light">{{ request.user.empresa_rut|default:'-' }}</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-uppercase text-muted mb-1">Encargado</label>
+                <div class="form-control bg-light">{{ request.user.empresa_encargado|default:'-' }}</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-uppercase text-muted mb-1">RUT encargado</label>
+                <div class="form-control bg-light">{{ request.user.empresa_encargado_rut|default:'-' }}</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label small text-uppercase text-muted mb-1">Ubicaci&oacute;n</label>
+                <div class="form-control bg-light">{{ request.user.empresa_ubicacion|default:'-' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% include 'menu/partials/footer.html' %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

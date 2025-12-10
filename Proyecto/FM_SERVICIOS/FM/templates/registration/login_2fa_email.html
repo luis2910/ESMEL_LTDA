@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <body style="font-family: Arial, Helvetica, sans-serif;">
+    <p>Hola {{ user.get_full_name|default:user.username }},</p>
+    <p>Tu código de verificación es: <strong>{{ code }}</strong></p>
+    <p>Este código vence en {{ minutes }} minutos.</p>
+    <p>
+      También puedes aprobar con un clic:<br>
+      <a href="{{ approve_url }}" style="display:inline-block;padding:10px 16px;background:#0d6efd;color:#fff;text-decoration:none;border-radius:6px;">Sí, soy yo</a>
+    </p>
+    <p>Si no intentaste iniciar sesión, ignora este mensaje.</p>
+    <p>— {{ site_name }}</p>
+  </body>
+ </html>
+

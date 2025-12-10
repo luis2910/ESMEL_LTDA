@@ -1,0 +1,46 @@
+{% load static %}
+<footer class="site-footer">
+  <div class="site-footer__top">
+    <div class="container">
+      <div class="row gy-4">
+        <div class="col-12 col-md-4">
+          <div class="d-flex align-items-start">
+            <img src="{% static 'menu/img/logo.jpeg' %}" alt="FM Servicios" class="footer-logo me-3">
+            <div>
+              <div class="footer-brand">FM SERVICIOS</div>
+              <div class="footer-subtitle">Servicios Generales LTDA.</div>
+              <div class="footer-contact mt-3">
+                <div class="footer-contact__item">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 2.4l3 1a1 1 0 01.7 1.1l-.5 3.1a1 1 0 01-.9.8 9.6 9.6 0 004.1 4.1 1 1 0 01.8-.9l3.1-.5a1 1 0 011.1.7l1 3a1 1 0 01-.5 1.2A13.2 13.2 0 013 6.9a1 1 0 01.5-1.2l3.1-1a1 1 0 01.7 0z"></path></svg>
+                  <a href="tel:+56932005633">+56932005633</a>
+                </div>
+                <div class="footer-contact__item">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3z"></path><path d="M3 7l9 6 9-6"></path></svg>
+                  <a href="mailto:fmella.fmservicios@gmail.com">fmella.fmservicios@gmail.com</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+          <h6 class="footer-heading">Compañía</h6>
+          <ul class="list-unstyled footer-links">
+            <li><a href="{% url 'index' %}">Inicio</a></li>
+            <li><a href="{% url 'servicios' %}">Servicios</a></li>
+            <li><a href="{% url 'contacto' %}">Contacto</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3">
+          <h6 class="footer-heading">Horario laboral</h6>
+          <p class="mb-1">Lunes a Viernes 08:30 AM – 18:00 PM.</p>
+          <p class="mb-0">Emergencias 24 Horas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="site-footer__bottom">
+    <div class="container d-flex justify-content-between flex-wrap gap-2">
+      <span class="small mb-0 text-white-50">© 2025 FM Servicios Generales. Todos los derechos reservados.</span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,374 @@
+{% load static %}
+{% load dictutils %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Calendario de agenda</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+</head>
+<body class="d-flex flex-column min-vh-100" style="background:#ffffff;">
+
+{% include 'menu/partials/navbar.html' %}
+
+<main class="container my-5 flex-grow-1" style="max-width: 1100px;">
+  <style>
+    :root {
+      --brand: rgb(0, 19, 93);
+      --panel-blue: rgb(0, 19, 93);
+      --card: #ffffff;
+      --border: #e5e9f2;
+      --muted: #6b7280;
+      --soft: #f6f8ff;
+    }
+    .nav-months { display: inline-flex; align-items: center; gap: 8px; }
+    .btn-month {
+      border: 1px solid rgba(255,255,255,0.28);
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .btn-month:hover { background: rgba(255,255,255,0.18); transform: translateY(-1px); }
+    .btn-month:active { transform: translateY(0); }
+    .btn-month.current {
+      background: #fff;
+      color: var(--brand);
+      border-color: #fff;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+    .hero {
+      background: var(--panel-blue);
+      color: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .hero .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+      font-weight: 700;
+    }
+    .hero h1 { font-weight: 800; margin: 0 0 6px; }
+    .hero p { margin: 0; color: rgba(255,255,255,0.88); }
+    .hero .chip { background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.28); padding: 6px 10px; border-radius: 999px; font-weight: 700; }
+    .calendar-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+    }
+    .calendar-card table { table-layout: fixed; }
+    .calendar-card thead { background: #f3f6ff; }
+    .day-cell {
+      height: 140px;
+      vertical-align: top;
+      position: relative;
+      background: #fff;
+      border: 1px solid #f1f2f6;
+      cursor: pointer;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+      }
+    .day-cell:hover {
+      background: #f3f6ff;
+      box-shadow: inset 0 0 0 1px #dbe4ff;
+    }
+    .day-disabled {
+      background: #f0f2f5;
+      color: #9ca3af;
+      cursor: not-allowed;
+      pointer-events: none;
+      box-shadow: inset 0 0 0 1px #e5e7eb;
+    }
+    .day-number { font-weight: 800; color: #111827; }
+    .badge-visitas {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: #e9f5ff;
+      color: #0f4a8a;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: 1px solid #d4e9ff;
+    }
+    .visit-list {
+      max-height: 80px;
+      overflow: auto;
+      padding-left: 12px;
+      margin-bottom: 0;
+      margin-top: 6px;
+    }
+    .visit-list li { font-size: 0.9rem; color: #334155; }
+    .available { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
+    .timeline {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+    }
+    .timeline h2 { font-weight: 800; color: #111827; }
+    .timeline-date { font-weight: 800; color: var(--brand); }
+    .timeline-list { display: flex; flex-direction: column; gap: 10px; list-style: none; padding-left: 0; margin: 0; }
+    .timeline-item {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #f9fbff;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+    }
+    .timeline-item h6 { margin: 0 0 4px; font-weight: 800; color: #0f172a; }
+    .timeline-item p { margin: 0; color: #334155; }
+    .chip {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #111827;
+      border: 1px solid #dfe3f7;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+  </style>
+
+  <section class="hero mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="pill">Agenda</span>
+          <span class="text-white-75">Visitas programadas</span>
+        </div>
+        <h1 class="h4 mb-1">Calendario de visitas y disponibilidad</h1>
+        <p>Revisa los días disponibles y las salidas de tu equipo técnico.</p>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-light btn-sm text-primary fw-semibold mt-2">&larr; Volver al panel</a>
+      </div>
+      <div class="nav-months">
+        <a class="btn-month" href="?mes={{ prev_month|date:'Y-m' }}">&#8592; Mes anterior</a>
+        <span class="btn-month current">Mes: {{ first_day|date:"F Y" }}</span>
+        <a class="btn-month" href="?mes={{ next_month|date:'Y-m' }}">Mes siguiente &#8594;</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="calendar-card mb-4">
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle mb-0 text-center">
+        <thead>
+          <tr>
+            <th class="small">Lun</th>
+            <th class="small">Mar</th>
+            <th class="small">Mié</th>
+            <th class="small">Jue</th>
+            <th class="small">Vie</th>
+            <th class="small">Sáb</th>
+            <th class="small">Dom</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for week in weeks %}
+            <tr>
+              {% for day in week %}
+                {% if day %}
+                  {% with visitas=visitas_por_dia|get_item:day %}
+                  <td class="text-start day-cell {% if day < today %}day-disabled{% endif %}" data-date="{{ day|date:"Y-m-d" }}">
+                    <div class="day-number">{{ day.day }}</div>
+                    {% if visitas %}
+                      <div class="mt-1 small">
+                        <span class="badge-visitas">{{ visitas|length }} visita{{ visitas|length|pluralize }}</span>
+                      </div>
+                      <ul class="visit-list">
+                        {% for v in visitas %}
+                          <li>
+                            {{ v.tecnico_nombre|default:"Técnico" }} — {{ v.fecha|date:"d/m" }}{% if v.hora %} {{ v.hora|time:"H:i" }}{% endif %}
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% else %}
+                      <div class="available">Disponible</div>
+                    {% endif %}
+                  </td>
+                  {% endwith %}
+                {% else %}
+                  <td class="bg-light"></td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="timeline">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h2 class="h6 mb-0">Visitas del mes</h2>
+      <div class="d-flex align-items-center gap-2">
+        <form method="get" class="d-flex align-items-center gap-2">
+          <input type="hidden" name="mes" value="{{ first_day|date:'Y-m' }}">
+          <select name="tecnico" class="form-select form-select-sm" style="width: 220px;">
+            <option value="">Todos los técnicos</option>
+            {% for tec in tecnicos %}
+              <option value="{{ tec.slug }}" {% if request.GET.tecnico == tec.slug %}selected{% endif %}>{{ tec.nombre }}{% if tec.especialidad %} — {{ tec.especialidad }}{% endif %}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-primary btn-sm" type="submit">Filtrar</button>
+        </form>
+        <span class="chip">{{ visitas_por_dia|length }} días con visitas</span>
+      </div>
+    </div>
+    {% if visitas_por_dia %}
+      <ul class="timeline-list">
+        {% for fecha, visitas in visitas_por_dia.items %}
+          <li class="timeline-item">
+            <h6 class="timeline-date mb-1">{{ fecha|date:"l d \\d\\e F" }}</h6>
+            {% for v in visitas %}
+              <p class="small mb-1">
+                <strong>{{ v.tecnico_nombre|default:"Técnico" }}</strong>
+                {% if v.hora %} · {{ v.hora|time:"H:i" }}{% endif %}
+                | Servicio: {{ v.cotizacion.servicio.titulo|default:"-" }}
+                | Región/Comuna: {{ v.cotizacion.region|default:"-" }}/{{ v.cotizacion.comuna|default:"-" }}
+              </p>
+            {% endfor %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted mb-0">No hay visitas programadas este mes.</p>
+    {% endif %}
+  </section>
+</main>
+
+{% include 'menu/partials/footer.html' %}
+
+<!-- Modal crear visita -->
+<div class="modal fade" id="modalVisita" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar visita</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{% url 'agenda_visitas' %}" class="row g-3">
+          {% csrf_token %}
+          <div class="col-md-6">
+            <label class="form-label">Cliente / Comunidad *</label>
+            <input type="text" name="cliente" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Correo de contacto</label>
+            <input type="email" name="correo" class="form-control" placeholder="cliente@correo.com">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Fecha *</label>
+            <input type="date" name="fecha" class="form-control" id="modalFecha" required readonly>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Hora *</label>
+            <input type="time" name="hora" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Técnico asignado *</label>
+            <select name="tecnico" class="form-select" required>
+              <option value="">Selecciona un técnico</option>
+              {% for tec in tecnicos %}
+                <option value="{{ tec.slug }}">{{ tec.nombre }} — {{ tec.especialidad }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Servicio</label>
+            <select name="servicio" class="form-select">
+              <option value="">Selecciona servicio</option>
+              {% for s in servicios_lista %}
+                <option value="{{ s.titulo }}">{{ s.titulo }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Región</label>
+            <select name="region" class="form-select" id="modalRegion">
+              <option value="">Selecciona región</option>
+              {% for nombre in regiones %}
+                <option value="{{ nombre }}">{{ nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Comuna</label>
+            <select name="comuna" class="form-select" id="modalComuna">
+              <option value="">Selecciona comuna</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Dirección / Ubicación</label>
+            <input type="text" name="direccion" class="form-control" placeholder="Ej: Edificio Central, piso 1">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Notas</label>
+            <textarea name="notas" rows="3" class="form-control" placeholder="Detalle de la visita, materiales necesarios, etc."></textarea>
+          </div>
+          <div class="col-12 text-end">
+            <button class="btn btn-primary" type="submit">Guardar visita</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function(){
+    var cells = document.querySelectorAll(".day-cell[data-date]");
+    var modalEl = document.getElementById("modalVisita");
+    var modal = modalEl ? new bootstrap.Modal(modalEl) : null;
+    var fechaInput = document.getElementById("modalFecha");
+    cells.forEach(function(cell){
+      cell.addEventListener("click", function(){
+        if (!modal) return;
+        var d = cell.getAttribute("data-date");
+        if (fechaInput) fechaInput.value = d || "";
+        if (fechaInput) fechaInput.setAttribute("readonly", "readonly");
+        modal.show();
+      });
+    });
+
+    // Regiones/Comunas en modal
+    var regionesData = {};
+    try { regionesData = JSON.parse('{{ regiones_json|escapejs }}'); } catch (_) {}
+    var regionSelect = document.getElementById("modalRegion");
+    var comunaSelect = document.getElementById("modalComuna");
+    function renderComunas(region) {
+      if (!comunaSelect) return;
+      var opts = regionesData[region] || [];
+      comunaSelect.innerHTML = '<option value=\"\">Selecciona comuna</option>';
+      opts.forEach(function(nombre){
+        var opt = document.createElement("option");
+        opt.value = nombre;
+        opt.textContent = nombre;
+        comunaSelect.appendChild(opt);
+      });
+      comunaSelect.disabled = opts.length === 0;
+    }
+    if (regionSelect && comunaSelect) {
+      regionSelect.addEventListener("change", function(){ renderComunas(this.value); });
+      renderComunas(regionSelect.value || "");
+    }
+  })();
+</script>
+</body>
+</html>

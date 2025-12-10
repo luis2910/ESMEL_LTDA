@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+{% include 'menu/partials/navbar.html' %}
+
+<main class="container my-5 flex-grow-1" style="max-width: 900px;">
+  {% if request.user.is_authenticated and request.user.is_staff or request.user.is_authenticated and request.user.is_superuser %}
+    <div class="mb-3">
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-link p-0 text-decoration-none">&larr; Volver a administrar</a>
+    </div>
+  {% endif %}
+
+  <h2 class="text-center mb-2">Documentos disponibles</h2>
+  <p class="text-center text-muted mb-4">Visualiza las facturas y documentos en linea o descargalos cuando lo necesites.</p>
+
+  <form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-md-4">
+      <label class="form-label small mb-1">Categoría</label>
+      <select class="form-select form-select-sm" name="categoria" onchange="this.form.submit()">
+        <option value="">Todas</option>
+        {% for cat, label in categorias.choices %}
+          <option value="{{ cat }}" {% if filtro_cat == cat %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label small mb-1">Etiqueta contiene</label>
+      <input type="text" name="tag" value="{{ filtro_tag|default:'' }}" class="form-control form-control-sm" placeholder="Ej: factura" />
+    </div>
+    <div class="col-md-4 d-flex gap-2">
+      <button type="submit" class="btn btn-outline-primary btn-sm">Filtrar</button>
+      {% if filtro_cat or filtro_tag %}
+        <a href="{% url 'documentos_list' %}" class="btn btn-link btn-sm">Limpiar</a>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if docs %}
+    <div class="list-group shadow-sm">
+      {% for d in docs %}
+        {% with doc_url=d.url %}
+        <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="me-3 flex-grow-1">
+            <div class="fw-bold">{{ d.titulo }}</div>
+            {% if d.descripcion %}<div class="small text-muted">{{ d.descripcion|truncatechars:120 }}</div>{% endif %}
+            <small class="text-muted d-block">{{ d.creado_en|date:"d/m/Y H:i" }}</small>
+            <div class="mt-1 d-flex flex-wrap gap-2 align-items-center">
+              {% if d.publico %}
+                <span class="badge text-bg-primary">Público</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Privado</span>
+              {% endif %}
+              <span class="badge text-bg-light text-dark border">{{ d.get_categoria_display }}</span>
+              {% if d.storage_url %}
+                <span class="badge text-bg-success">Supabase</span>
+                {% if d.storage_bucket or d.storage_path %}
+                  <small class="text-muted">({{ d.storage_bucket|default:"bucket" }}{% if d.storage_path %}/{{ d.storage_path }}{% endif %})</small>
+                {% endif %}
+              {% elif d.archivo %}
+                <span class="badge text-bg-info">Local</span>
+              {% else %}
+                <span class="badge text-bg-warning text-dark">Sin archivo</span>
+              {% endif %}
+              {% if d.tags_list %}
+                <span class="text-muted small">|</span>
+                {% for t in d.tags_list %}
+                  <span class="badge rounded-pill text-bg-light text-dark border">{{ t }}</span>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#docViewerModal" data-doc-url="{{ doc_url }}" data-doc-title="{{ d.titulo }}" {% if not doc_url %}disabled{% endif %}>Ver</button>
+            <a class="btn btn-sm btn-outline-secondary {% if not doc_url %}disabled{% endif %}" href="{{ doc_url|default:'#' }}" {% if not doc_url %}tabindex="-1" aria-disabled="true"{% else %}download{% endif %}>Descargar</a>
+
+            {% if request.user.is_authenticated and request.user.is_staff or request.user.is_authenticated and request.user.is_superuser %}
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'documento_editar' d.pk %}">Editar</a>
+              <form method="post" action="{% url 'documento_eliminar' d.pk %}" class="m-0" onsubmit="return confirm('Seguro que quieres eliminar este documento?');">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+        {% endwith %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted text-center">No hay documentos aún.</p>
+  {% endif %}
+</main>
+
+{% include 'menu/partials/footer.html' %}
+
+{% if messages %}
+<div class="container my-3" style="max-width: 900px;">
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="modal fade" id="docViewerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="docViewerTitle">Vista de documento</h5>
+        <div class="d-flex align-items-center gap-2">
+          <a href="#" id="docViewerExternal" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Abrir en pestaña</a>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="ratio ratio-16x9 bg-light rounded">
+          <iframe id="docViewerFrame" src="" title="Documento" class="border rounded" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function(){
+    const modal = document.getElementById('docViewerModal');
+    const frame = document.getElementById('docViewerFrame');
+    const titleEl = document.getElementById('docViewerTitle');
+    const externalLink = document.getElementById('docViewerExternal');
+    if (!modal || !frame) return;
+    modal.addEventListener('shown.bs.modal', (event) => {
+      const trigger = event.relatedTarget;
+      const url = trigger ? trigger.getAttribute('data-doc-url') : '';
+      const docTitle = trigger ? trigger.getAttribute('data-doc-title') : '';
+      if (url) {
+        frame.src = url;
+        if (externalLink) externalLink.href = url;
+      }
+      if (titleEl && docTitle) {
+        titleEl.textContent = docTitle;
+      }
+    });
+    modal.addEventListener('hidden.bs.modal', () => {
+      frame.src = '';
+      if (externalLink) externalLink.href = '#';
+      if (titleEl) titleEl.textContent = 'Vista de documento';
+    });
+  })();
+</script>
+<script>
+  // Oculta y elimina alerts de Django tras unos segundos para evitar acumulación visual
+  (function(){
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach((el) => {
+      setTimeout(() => {
+        el.classList.add('fade');
+        el.classList.remove('show');
+        setTimeout(() => el.remove(), 400);
+      }, 4000);
+    });
+  })();
+</script>
+</body>
+</html>

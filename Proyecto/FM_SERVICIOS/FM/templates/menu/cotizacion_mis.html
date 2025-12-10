@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Mis cotizaciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% load static %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+  <style>
+    :root {
+      --brand: rgb(0, 19, 93);
+      --ink: #0f172a;
+      --muted: #6b7280;
+      --border: #e5e9f2;
+      --soft: #f6f8ff;
+    }
+    body { background: #f6f8ff; }
+    .page-shell { max-width: 1100px; }
+    .hero-card {
+      background: var(--brand);
+      color: #fff;
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.1);
+    }
+    .hero-title { color: #fff; font-weight: 800; }
+    .hero-card .text-muted { color: rgba(255,255,255,0.85) !important; }
+    .hero-pill {
+      display: inline-flex; gap: 8px; align-items: center;
+      padding: 8px 12px; border-radius: 999px;
+      background: rgba(255,255,255,0.18); color: #fff;
+      border: 1px solid rgba(255,255,255,0.28); font-weight: 700;
+    }
+    .quote-card {
+      background: #fff;
+      color: inherit;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.05);
+    }
+    .quote-header {
+      display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      border-bottom: 1px dashed #dfe3ef; padding-bottom: 12px; margin-bottom: 12px;
+    }
+    .quote-title { font-weight: 800; color: var(--ink); }
+    .pill-id { color: #475569; font-weight: 700; font-size: 0.9rem; }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 10px; font-weight: 700; font-size: 0.9rem;
+    }
+    .status-ENVIADA { background: #e5f0ff; color: #0d47a1; }
+    .status-PENDIENTE { background: #fff4d6; color: #8a6a00; }
+    .status-ACEPTADA { background: #e6f6ed; color: #166534; }
+    .status-PROCESO_PAGO { background: #fff3cd; color: #8a6a00; }
+    .status-COMPLETADA { background: #e8edff; color: #14205c; }
+    .status-RECHAZADA { background: #fde2e1; color: #b42318; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .info-box {
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .info-box h6 { margin: 0 0 4px; font-weight: 800; color: var(--ink); font-size: 0.95rem; }
+    .info-box p, .info-box li { margin: 0; color: var(--muted); white-space: pre-line; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .helper { color: var(--muted); font-size: 0.9rem; }
+    .price-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 10px;
+      background: #e9f5ff; color: #0f4a8a; font-weight: 800;
+      border: none;
+    }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+{% include 'menu/partials/navbar.html' %}
+
+<main class="container my-5 flex-grow-1 page-shell">
+  {% if request.user.is_authenticated %}
+    {% if request.user.is_staff or request.user.is_superuser %}
+      <div class="mb-3">
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-link p-0 text-decoration-none">&larr; Volver a administrar</a>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  <section class="hero-card mb-4">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <span class="hero-pill">Mis cotizaciones</span>
+      <span class="text-muted small">Total: {{ cotizaciones|length }}</span>
+    </div>
+    <h1 class="hero-title h4 mb-1">Resumen y detalles de tus solicitudes</h1>
+    <p class="mb-0 text-muted">Cada tarjeta muestra la propuesta enviada por el equipo: valor estimado, visita programada y resumen.</p>
+  </section>
+
+  {% if messages %}
+    <div class="mb-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if cotizaciones %}
+    <div class="d-flex flex-column gap-3">
+      {% for c in cotizaciones %}
+        {% with visita=c.visitas.all|first %}
+        <article class="quote-card">
+          <div class="quote-header">
+            <div>
+              <div class="quote-title mb-1">{{ c.servicio.titulo|default:"Solicitud sin servicio asignado" }}</div>
+              <div class="text-muted small text-white-75">
+                {{ c.asunto|default:"Sin asunto" }}<br>
+                Enviada el {{ c.creado_en|date:"d/m/Y H:i" }}
+              </div>
+            </div>
+            <div class="text-end">
+              <span class="status-pill status-{{ c.estado|default:'PENDIENTE' }}">{{ c.get_estado_display }}</span><br>
+              <span class="pill-id">ID #{{ c.id }}</span>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <span class="price-chip js-price" data-amount="{{ c.presupuesto_estimado|default_if_none:0 }}">Valor estimado: $ --</span>
+            {% if visita %}
+              <span class="text-muted small">Visita programada: {{ visita.fecha|date:"d/m/Y" }} {% if visita.hora %}a las {{ visita.hora|time:"H:i" }}{% endif %}</span>
+            {% endif %}
+          </div>
+
+          <div class="info-grid">
+            <div class="info-box">
+              <h6>Visita programada</h6>
+              {% if visita %}
+                <ul class="mb-0 text-muted small ps-3">
+                  <li><strong>Fecha:</strong> {{ visita.fecha|date:"d/m/Y" }}</li>
+                  {% if visita.hora %}<li><strong>Hora:</strong> {{ visita.hora|time:"H:i" }}</li>{% endif %}
+                  <li><strong>Técnico:</strong> {{ visita.tecnico_nombre|default:"Por asignar" }}</li>
+                  <li><strong>Dirección:</strong> {{ visita.direccion|default:c.lugar_servicio|default:"Por definir" }}</li>
+                  <li><strong>Región/Comuna:</strong> {{ visita.region|default:c.region|default:"-" }}/{{ visita.comuna|default:c.comuna|default:"-" }}</li>
+                </ul>
+              {% else %}
+                <p>En cuanto asignemos fecha y técnico, verás la visita aquí.</p>
+              {% endif %}
+            </div>
+            <div class="info-box">
+              <h6>Resumen de tu solicitud</h6>
+              <ul class="mb-0 text-muted small ps-3 text-white">
+                <li><strong>Servicio:</strong> {{ c.servicio.titulo|default:"-" }}</li>
+                <li><strong>Asunto:</strong> {{ c.asunto|default:"-" }}</li>
+                <li><strong>Mensaje:</strong> <span class="js-message" data-message="{{ c.mensaje|default:''|escape }}">{{ c.mensaje|default:"[Sin mensaje]" }}</span></li>
+              </ul>
+            </div>
+            <div class="info-box">
+              <h6>Contacto</h6>
+              <ul class="mb-0 text-muted small ps-3 text-white">
+                <li><strong>Correo:</strong> {{ c.usuario.email|default:"-" }}</li>
+                <li><strong>Tel:</strong> {{ c.usuario.telefono|default:"-" }}</li>
+              </ul>
+            </div>
+            <div class="info-box">
+              <h6>Ubicación del servicio</h6>
+              <ul class="mb-0 text-muted small ps-3 text-white">
+                <li><strong>Lugar:</strong> {{ c.lugar_servicio|default:"-" }}</li>
+                <li><strong>Región/Comuna:</strong> {{ c.region|default:"-" }}/{{ c.comuna|default:"-" }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="actions">
+            {% if c.estado == 'ENVIADA' %}
+              <form method="post" action="{% url 'cotizacion_responder' c.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="aceptar">
+                <button type="submit" class="btn btn-success btn-sm">Aceptar</button>
+              </form>
+              <form method="post" action="{% url 'cotizacion_responder' c.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="rechazar">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Rechazar</button>
+              </form>
+              <span class="helper">Al aceptar o rechazar, el estado se actualiza tanto aquí como en administración.</span>
+            {% elif c.estado == 'PENDIENTE' %}
+              <span class="helper">En revisión por el administrador. Recibirás la propuesta para aceptar o rechazar.</span>
+            {% elif c.estado == 'PROCESO_PAGO' %}
+              <form method="post" action="{% url 'cotizacion_pagar' c.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-sm">Pagar</button>
+              </form>
+              <span class="helper">Completa el pago para agendar tu visita.</span>
+            {% elif c.estado == 'ACEPTADA' %}
+              {% if c.completada %}
+                <span class="helper">Servicio completado.</span>
+              {% elif c.tiene_trabajo %}
+                <form method="post" action="{% url 'cotizacion_pagar' c.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary btn-sm">Pagar</button>
+                </form>
+                <span class="helper">Paga para confirmar tu servicio.</span>
+              {% else %}
+                <span class="helper">Tu solicitud fue aceptada, pronto asignaremos fecha.</span>
+              {% endif %}
+            {% elif c.estado == 'COMPLETADA' %}
+              <span class="helper">Servicio completado.</span>
+            {% elif c.estado == 'RECHAZADA' %}
+              <span class="helper">Solicitud rechazada.</span>
+            {% endif %}
+          </div>
+        </article>
+        {% endwith %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center bg-white p-5 rounded shadow-sm">
+      <p class="mb-3">Aún no tienes cotizaciones registradas.</p>
+    </div>
+  {% endif %}
+</main>
+
+{% include 'menu/partials/footer.html' %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function(){
+    // Formatea valores CLP sin decimales, separador de miles con punto
+    var prices = document.querySelectorAll(".js-price");
+    prices.forEach(function(el){
+      var raw = parseFloat(el.dataset.amount || "0");
+      if (isNaN(raw)) {
+        el.textContent = "Valor estimado: $ No informado";
+        return;
+      }
+      var formatted = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(raw);
+      formatted = formatted.replace("CLP", "").trim();
+      el.textContent = "Valor estimado: " + formatted;
+    });
+
+    // Limpia el mensaje mostrando solo el texto final escrito por el usuario
+    var msgs = document.querySelectorAll(".js-message");
+    msgs.forEach(function(span){
+      var raw = span.dataset.message || "";
+      var cleaned = "";
+      if (raw.indexOf("\n\n") !== -1) {
+        cleaned = raw.split("\n\n").pop().trim();
+      } else {
+        var lines = raw.split("\n").filter(function(line){
+          return !(line.trim().startsWith("Tel") || line.trim().startsWith("Lugar") || line.trim().startsWith("Reg") || line.trim().startsWith("Region"));
+        });
+        cleaned = lines.join(" ").trim();
+      }
+      span.textContent = cleaned || "[Sin mensaje]";
+    });
+  })();
+</script>
+</body>
+</html>

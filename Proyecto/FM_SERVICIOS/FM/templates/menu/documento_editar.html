@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar documento</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+  <!-- Navbar -->
+{% include 'menu/partials/navbar.html' %}
+
+<main class="container my-5 flex-grow-1" style="max-width: 800px;">
+    <h2 class="mb-4 text-center">Editar documento</h2>
+
+    {% if messages %}
+      <div class="mb-3">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="bg-white p-4 rounded shadow-sm">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label" for="id_titulo">Título</label>
+        {{ form.titulo }}
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="id_descripcion">Descripción</label>
+        {{ form.descripcion }}
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'documentos_list' %}" class="btn btn-outline-secondary">Volver</a>
+      </div>
+    </form>
+  </main>
+
+  {% include 'menu/partials/footer.html' %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+

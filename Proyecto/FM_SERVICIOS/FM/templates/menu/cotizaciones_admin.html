@@ -1,0 +1,270 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Cotizaciones (Admin)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+  <style>
+    :root {
+      --cta-blue: rgb(0, 19, 93);
+      --cta-sky: #4da3ff;
+      --cta-soft: #f1f5ff;
+      --cta-ink: #0f172a;
+      --cta-border: #e8ecf4;
+    }
+    body { background: #ffffff; }
+    .page-hero {
+      position: relative;
+      border-radius: 18px;
+      padding: 20px;
+      overflow: hidden;
+      background: var(--cta-blue);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 16px 30px rgba(0,0,0,0.12);
+      color: #fff;
+    }
+    .page-hero::after { display: none; }
+    .hero-title { color: #fff; font-weight: 800; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.32);
+    }
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.32);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+      font-weight: 700;
+      color: #fff;
+    }
+    .stat-pill small { font-weight: 600; color: rgba(255,255,255,0.8); }
+    .page-hero p { color: rgba(255,255,255,0.9); }
+    .page-hero .text-muted { color: rgba(255,255,255,0.85) !important; }
+    .list-wrapper { margin-top: 22px; }
+    .quote-card {
+      background: #fff;
+      border: 1px solid var(--cta-border);
+      border-radius: 18px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.06);
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    .quote-meta { color: #6b7280; font-weight: 700; letter-spacing: 0.01em; }
+    .quote-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px dashed #e5e7eb;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+    .quote-client { color: var(--cta-ink); font-weight: 800; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: rgba(0,21,97,0.08);
+      color: var(--cta-blue);
+      font-weight: 700;
+    }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .info-box {
+      border: 1px solid var(--cta-border);
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--cta-soft);
+    }
+    .info-box h6 { margin: 0 0 4px; font-weight: 800; color: var(--cta-ink); font-size: 0.95rem; }
+    .info-box p { margin: 0; color: #4b5563; font-size: 0.95rem; white-space: pre-line; }
+    .forms-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+      align-items: start;
+    }
+    .quote-form {
+      border: 1px solid var(--cta-border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fdfefe;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    .quote-form .form-label { font-size: 0.9rem; color: #4b5563; }
+    .btn-primary {
+      --bs-btn-bg: var(--cta-blue);
+      --bs-btn-border-color: var(--cta-blue);
+      --bs-btn-hover-bg: #00104a;
+      --bs-btn-hover-border-color: #00104a;
+    }
+    .quote-form input[type="date"]::-webkit-calendar-picker-indicator { filter: hue-rotate(200deg); }
+    .quote-form input[type="date"] {
+      background-color: #fff;
+    }
+    .empty-state {
+      background: #fff;
+      border: 1px dashed var(--cta-border);
+      border-radius: 16px;
+      padding: 36px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+{% include 'menu/partials/navbar.html' %}
+
+<main class="container my-5 flex-grow-1" style="max-width: 1180px;">
+  <div class="mb-3">
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-link p-0 text-decoration-none">&larr; Volver a administrar</a>
+  </div>
+
+  <section class="page-hero mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <div class="chip mb-2">Panel de cotizaciones</div>
+        <h1 class="hero-title h3 mb-1">Solicitudes recibidas</h1>
+        <p class="text-muted mb-0">Revisa, agenda y responde cada requerimiento con rapidez.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <div class="stat-pill">
+          <div>
+            <small>Totales</small><br>{{ cotizaciones|length }}
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div>
+            <small>Pendientes</small><br>{{ cotizaciones|length }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if cotizaciones %}
+    <div class="list-wrapper">
+      {% for c in cotizaciones %}
+        <div class="quote-card">
+          <div class="quote-header">
+            <div>
+              <div class="quote-meta small text-uppercase">Recibida</div>
+              <div class="fw-bold">{{ c.creado_en|date:"d/m/Y" }} <span class="text-muted">a las</span> {{ c.creado_en|date:"H:i" }}</div>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <div class="tag">Servicio: {{ c.servicio.titulo|default:"No especificado" }}</div>
+              <div class="tag">Cliente: {{ c.usuario.get_full_name|default:c.usuario.username }}</div>
+            </div>
+          </div>
+
+          <div class="info-grid mb-2">
+            <div class="info-box">
+              <h6>Contacto</h6>
+              <p>{{ c.usuario.email|default:"-" }}<br>Tel: {{ c.usuario.telefono|default:"-" }}</p>
+            </div>
+            <div class="info-box">
+              <h6>Ubicación</h6>
+              <p>Lugar: {{ c.lugar_servicio|default:"-" }}<br>Región/Comuna: {{ c.region|default:"-" }}/{{ c.comuna|default:"-" }}</p>
+            </div>
+            <div class="info-box">
+              <h6>Asunto</h6>
+              <p>{{ c.asunto|default:"-" }}</p>
+            </div>
+            <div class="info-box">
+              <h6>Mensaje</h6>
+              <p>{{ c.mensaje|default:"[Sin mensaje]" }}</p>
+            </div>
+          </div>
+
+          <div class="forms-stack">
+            <div class="quote-form">
+              <form method="post" action="{% url 'cotizacion_enviar' c.pk %}" class="row g-2">
+                {% csrf_token %}
+                <div class="col-12">
+                  <label class="form-label small mb-1">Precio estimado</label>
+                  <input type="number" step="1" min="0" name="precio" class="form-control form-control-sm" placeholder="Precio estimado" value="{{ c.presupuesto_estimado|default_if_none:'20000' }}" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label small mb-1">Técnico asignado</label>
+                  <select name="tecnico" class="form-select form-select-sm" required>
+                    <option value="">Selecciona un técnico</option>
+                    {% for tec in tecnicos %}
+                      <option value="{{ tec.slug }}">{{ tec.nombre }}{% if tec.especialidad %} - {{ tec.especialidad }}{% endif %}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-1">Fecha visita</label>
+                  <input type="date" name="fecha" class="form-control form-control-sm js-date-min">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-1">Hora visita</label>
+                  <input type="time" name="hora" class="form-control form-control-sm">
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-sm btn-primary w-100">Enviar cotización</button>
+                </div>
+              </form>
+            </div>
+            <div class="quote-form">
+              <form method="post" action="{% url 'cotizacion_rechazar' c.pk %}">
+                {% csrf_token %}
+                <label class="form-label small mb-1">Motivo del rechazo</label>
+                <textarea name="motivo" class="form-control form-control-sm mb-2" rows="4" placeholder="Motivo del rechazo" required></textarea>
+                <button type="submit" class="btn btn-sm btn-outline-danger w-100">Rechazar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state text-center">
+      <h5 class="fw-bold text-dark mb-2">Sin cotizaciones aún</h5>
+      <p class="text-muted mb-0">Cuando lleguen solicitudes, las verás aquí para gestionarlas.</p>
+    </div>
+  {% endif %}
+</main>
+
+{% include 'menu/partials/footer.html' %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function(){
+    // Habilitar fechas solo desde mañana en adelante
+    var inputs = document.querySelectorAll(".js-date-min");
+    var now = new Date();
+    now.setDate(now.getDate() + 1);
+    var min = now.toISOString().split("T")[0];
+    inputs.forEach(function(inp){
+      inp.setAttribute("min", min);
+    });
+  })();
+</script>
+</body>
+</html>

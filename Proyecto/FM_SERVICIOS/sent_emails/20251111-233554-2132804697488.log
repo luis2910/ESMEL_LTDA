@@ -1,0 +1,50 @@
+Content-Type: multipart/alternative;
+ boundary="===============0453182333195545430=="
+MIME-Version: 1.0
+Subject: 
+ =?utf-8?q?Tu_c=C3=B3digo_de_verificaci=C3=B3n_-_FM_SERVICIOS_GENERALES?=
+From: no-reply@fm-servicios.local
+To: luchoopr1@gmail.com
+Date: Wed, 12 Nov 2025 02:35:54 -0000
+Message-ID: <176291495459.2764.12089438148803214741@DESKTOP-F08RVJ7>
+
+--===============0453182333195545430==
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+Hola as as,
+
+Tu código de verificación es: 662350
+Este código vence en 10 minutos.
+
+También puedes aprobar con un clic:
+http://127.0.0.1:8000/login/approve/19cxMuh8nXw4d_S-KLWutdEbbUDMIeRV/
+
+Si no intentaste iniciar sesión, ignora este mensaje.
+
+— FM SERVICIOS GENERALES
+
+--===============0453182333195545430==
+Content-Type: text/html; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+<!doctype html>
+<html>
+  <body style="font-family: Arial, Helvetica, sans-serif;">
+    <p>Hola as as,</p>
+    <p>Tu código de verificación es: <strong>662350</strong></p>
+    <p>Este código vence en 10 minutos.</p>
+    <p>
+      También puedes aprobar con un clic:<br>
+      <a href="http://127.0.0.1:8000/login/approve/19cxMuh8nXw4d_S-KLWutdEbbUDMIeRV/" style="display:inline-block;padding:10px 16px;background:#0d6efd;color:#fff;text-decoration:none;border-radius:6px;">Sí, soy yo</a>
+    </p>
+    <p>Si no intentaste iniciar sesión, ignora este mensaje.</p>
+    <p>— FM SERVICIOS GENERALES</p>
+  </body>
+ </html>
+
+--===============0453182333195545430==--
+
+-------------------------------------------------------------------------------

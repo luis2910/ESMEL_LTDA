@@ -1,0 +1,181 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Agenda del t&eacute;cnico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+{% include 'menu/partials/navbar.html' %}
+
+<main class="container my-5 flex-grow-1" style="max-width: 1100px;">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <p class="text-uppercase text-muted small mb-1">Panel del t&eacute;cnico</p>
+      <h1 class="h4 mb-0">{{ tecnico.nombre|default:request.user.get_full_name|default:request.user.username }}</h1>
+      <p class="text-muted mb-0">{{ tecnico.especialidad|default:"Agenda asignada" }}</p>
+    </div>
+    <div class="text-end">
+      <p class="small text-muted mb-1 mb-0">C&oacute;digo de acceso</p>
+      <div class="badge text-bg-dark fs-6">{{ access_code|default:"-" }}</div>
+      <p class="small text-muted mt-2 mb-0">
+        Usuario: <strong>{{ request.user.username }}</strong><br>
+        Correo: <strong>{{ tecnico.email|default:request.user.email }}</strong>
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="rounded bg-white shadow-sm p-3 h-100">
+        <p class="text-muted text-uppercase small mb-1">Cotizaciones asignadas</p>
+        <div class="d-flex align-items-baseline gap-2">
+          <span class="display-6 fw-bold mb-0">{{ stats.total_cotizaciones }}</span>
+          <span class="text-success small">en total</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="rounded bg-white shadow-sm p-3 h-100">
+        <p class="text-muted text-uppercase small mb-1">Visitas programadas</p>
+        <div class="d-flex align-items-baseline gap-2">
+          <span class="display-6 fw-bold mb-0">{{ stats.visitas_programadas }}</span>
+          <span class="text-muted small">en agenda</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="rounded bg-white shadow-sm p-3 h-100">
+        <p class="text-muted text-uppercase small mb-1">Para hoy</p>
+        <div class="d-flex align-items-baseline gap-2">
+          <span class="display-6 fw-bold mb-0">{{ stats.visitas_hoy }}</span>
+          <span class="text-muted small">visitas</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="rounded bg-white shadow-sm p-3 h-100">
+        <p class="text-muted text-uppercase small mb-1">Pr&oacute;ximas</p>
+        <div class="d-flex align-items-baseline gap-2">
+          <span class="display-6 fw-bold mb-0">{{ stats.visitas_proximas }}</span>
+          <span class="text-muted small">desde hoy</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="bg-white rounded shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <p class="text-muted small mb-1">Agenda</p>
+        <h2 class="h5 mb-0">Visitas programadas</h2>
+      </div>
+      <span class="badge text-bg-primary">{{ visitas|length }} registros</span>
+    </div>
+    {% if visitas %}
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Servicio</th>
+              <th>Ubicaci&oacute;n</th>
+              <th>Notas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for visita in visitas %}
+              {% with cot=visita.cotizacion %}
+              <tr>
+                <td class="text-nowrap">
+                  <div class="fw-semibold">{{ visita.fecha|date:"d/m/Y" }}</div>
+                  <div class="text-muted small">{{ visita.hora|default:"Sin hora" }}</div>
+                </td>
+                <td>
+                  {% if cot %}
+                    <strong>{{ cot.usuario.get_full_name|default:cot.usuario.username }}</strong><br>
+                    <span class="text-muted small">{{ cot.usuario.email }}</span>
+                  {% else %}
+                    <strong>{{ visita.cliente }}</strong><br>
+                    <span class="text-muted small">{{ visita.correo|default:"-" }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if cot and cot.servicio %}
+                    {{ cot.servicio.titulo }}
+                  {% elif cot %}
+                    {{ cot.asunto|default:"Cotizaci&oacute;n" }}
+                  {% else %}
+                    Visita programada
+                  {% endif %}
+                </td>
+                <td class="small">
+                  <div><span class="text-muted">Direcci&oacute;n:</span> {{ visita.direccion|default:"-" }}</div>
+                  <div><span class="text-muted">Regi&oacute;n/Comuna:</span> {{ visita.region|default:"-" }}/{{ visita.comuna|default:"-" }}</div>
+                </td>
+                <td style="white-space: pre-line;" class="small">
+                  {% if visita.notas %}<div class="mb-1">{{ visita.notas }}</div>{% endif %}
+                  {% if cot and cot.mensaje %}<div class="text-muted">{{ cot.mensaje }}</div>{% endif %}
+                </td>
+              </tr>
+              {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center text-muted">A&uacute;n no tienes visitas agendadas.</div>
+    {% endif %}
+  </section>
+
+  <section class="bg-white rounded shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <p class="text-muted small mb-1">Cotizaciones</p>
+        <h2 class="h5 mb-0">Solicitudes asignadas</h2>
+      </div>
+    </div>
+    {% if cotizaciones_asignadas %}
+      <div class="row g-3">
+        {% for c in cotizaciones_asignadas %}
+          <div class="col-md-6">
+            <article class="border rounded p-3 h-100">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h3 class="h6 mb-1">{{ c.servicio.titulo|default:"Cotizaci&oacute;n" }}</h3>
+                  <p class="text-muted small mb-0">{{ c.asunto|default:"Solicitud pendiente" }}</p>
+                </div>
+                <span class="badge {% if c.estado == 'ACEPTADA' %}text-bg-success{% elif c.estado == 'RECHAZADA' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">
+                  {{ c.get_estado_display }}
+                </span>
+              </div>
+              <ul class="list-unstyled small text-muted mb-2">
+                <li><strong>Cliente:</strong> {{ c.usuario.get_full_name|default:c.usuario.username }}</li>
+                <li><strong>Correo:</strong> {{ c.usuario.email }}</li>
+                <li><strong>Ubicaci&oacute;n:</strong> {{ c.region|default:"-" }}/{{ c.comuna|default:"-" }}</li>
+                <li><strong>Direcci&oacute;n del servicio:</strong> {{ c.lugar_servicio|default:"-" }}</li>
+              </ul>
+              {% if c.mensaje %}
+                <p class="small mb-0">{{ c.mensaje }}</p>
+              {% endif %}
+            </article>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center text-muted">No hay cotizaciones asignadas a tu agenda.</div>
+    {% endif %}
+  </section>
+</main>
+
+{% include 'menu/partials/footer.html' %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

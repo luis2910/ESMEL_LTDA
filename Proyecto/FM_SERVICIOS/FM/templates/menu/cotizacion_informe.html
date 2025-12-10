@@ -1,0 +1,360 @@
+﻿{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Generar informe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+{% include 'menu/partials/navbar.html' %}
+
+<main class="container my-5 flex-grow-1" style="max-width: 800px;">
+  <div class="mb-3">
+    <a href="{% url 'cotizaciones_admin' %}" class="btn btn-link p-0 text-decoration-none">&larr; Volver a cotizaciones</a>
+  </div>
+
+  <div class="bg-white rounded shadow-sm p-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+      <div>
+        <p class="text-muted small mb-1">Informe de cotización</p>
+        <h1 class="h5 mb-0">Cotización #{{ cot.id }}</h1>
+      </div>
+      <span class="badge text-bg-success">{{ cot.get_estado_display }}</span>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted mb-1">Cliente</label>
+          <div class="form-control bg-light">{{ cot.usuario.get_full_name|default:cot.usuario.username }}</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted mb-1">Correo</label>
+          <div class="form-control bg-light">{{ cot.usuario.email }}</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted mb-1">Servicio</label>
+          <div class="form-control bg-light">{{ cot.servicio.titulo|default:"-" }}</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted mb-1">Asunto</label>
+          <div class="form-control bg-light">{{ cot.asunto|default:"-" }}</div>
+        </div>
+        <div class="col-md-12">
+          <label class="form-label small text-uppercase text-muted mb-1">Mensaje</label>
+          <div class="form-control bg-light" style="min-height: 100px; white-space: pre-line;">{{ cot.mensaje|default:"-" }}</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted mb-1">Ubicación</label>
+          <div class="form-control bg-light">{{ cot.region|default:"-" }} / {{ cot.comuna|default:"-" }}</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted mb-1">Dirección servicio</label>
+          <div class="form-control bg-light">{{ cot.lugar_servicio|default:"-" }}</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted mb-1">Subtotal trabajo (CLP)</label>
+          <input type="number" name="precio" class="form-control" step="100" min="0" value="{{ precio|floatformat:0 }}" required readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small text-uppercase text-muted mb-1">Fecha cotización</label>
+          <div class="form-control bg-light">{{ cot.creado_en|date:"d/m/Y H:i" }}</div>
+        </div>
+      </div>
+
+      <div class="mt-4 d-flex justify-content-end gap-2">
+        <a href="{% url 'cotizaciones_admin' %}" class="btn btn-outline-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Autorizar pago</button>
+      </div>
+      <input type="hidden" name="insumos_json" id="insumosJson" value="[]">
+      <input type="hidden" name="trabajos_json" id="trabajosJson" value="[]">
+    </form>
+
+    <hr class="my-4">
+    <div class="mb-4">
+      <p class="text-muted small mb-1">Trabajo realizado</p>
+      <div class="row g-2 align-items-end">
+        <div class="col-md-7">
+          <label class="form-label">Descripción</label>
+          <input type="text" id="trabajoDesc" class="form-control" placeholder="Ej: Mantención mensual bombas">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Precio</label>
+          <input type="number" id="trabajoPrecio" class="form-control" min="0" step="100" placeholder="0">
+        </div>
+        <div class="col-md-2">
+          <button type="button" id="addTrabajoBtn" class="btn btn-outline-primary w-100">Agregar</button>
+        </div>
+      </div>
+      <div class="table-responsive mt-3">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Trabajo</th>
+              <th class="text-end">Precio</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="trabajosList">
+            <tr id="trabajosEmpty"><td colspan="3" class="text-muted text-center">Sin trabajos agregados.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <p class="text-muted small mb-1">Insumos</p>
+      <div class="row g-2 align-items-end">
+        <div class="col-md-6">
+          <label class="form-label">Insumo</label>
+          <select id="insumoSelect" class="form-select">
+            <option value="">Selecciona insumo</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <button type="button" id="addInsumoBtn" class="btn btn-outline-primary w-100">Agregar</button>
+        </div>
+        <div class="col-md-3 text-end">
+          <div class="small text-muted">Total insumos</div>
+          <div class="fs-5 fw-semibold" id="totalInsumosTxt">$0</div>
+        </div>
+      </div>
+
+      <div class="table-responsive mt-3">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th class="text-end">Precio</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="insumosList">
+            <tr id="insumosEmpty"><td colspan="3" class="text-muted text-center">Sin insumos agregados.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <p class="text-muted small mb-1">Detalle y totales</p>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Concepto</th>
+              <th class="text-end">Precio</th>
+            </tr>
+          </thead>
+          <tbody id="detalleList">
+            <tr id="detalleEmpty"><td colspan="2" class="text-muted text-center">Agrega trabajos e insumos para ver el detalle.</td></tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Monto neto</th>
+              <th class="text-end" id="netoTxt">$0</th>
+            </tr>
+            <tr>
+              <th>I.V.A. 19%</th>
+              <th class="text-end" id="ivaTxt">$0</th>
+            </tr>
+            <tr>
+              <th>Total</th>
+              <th class="text-end" id="totalFinalTxt">$0</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+{% include 'menu/partials/footer.html' %}
+
+{{ insumos_bd|json_script:"insumos-data" }}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function(){
+    const insumoSelect = document.getElementById('insumoSelect');
+    const addInsumoBtn = document.getElementById('addInsumoBtn');
+    const insumosList = document.getElementById('insumosList');
+    const totalInsumosTxt = document.getElementById('totalInsumosTxt');
+    const insumosJsonInput = document.getElementById('insumosJson');
+
+    const trabajoDescInput = document.getElementById('trabajoDesc');
+    const trabajoPrecioInput = document.getElementById('trabajoPrecio');
+    const addTrabajoBtn = document.getElementById('addTrabajoBtn');
+    const trabajosList = document.getElementById('trabajosList');
+    const trabajosJsonInput = document.getElementById('trabajosJson');
+
+    const detalleList = document.getElementById('detalleList');
+    const netoTxt = document.getElementById('netoTxt');
+    const ivaTxt = document.getElementById('ivaTxt');
+    const totalFinalTxt = document.getElementById('totalFinalTxt');
+    const baseInput = document.querySelector('input[name="precio"]');
+
+    const INSUMOS_DB = JSON.parse(document.getElementById('insumos-data').textContent || '[]');
+    const servicioSlug = "{{ cot.servicio.slug|default:'' }}".toLowerCase();
+
+    let trabajos = [];
+    let insumos = [];
+
+    function formatCLP(n) {
+      return '$' + (n || 0).toLocaleString('es-CL');
+    }
+
+    function populateSelect() {
+      const options = INSUMOS_DB.filter(ins => !ins.servicio || ins.servicio.toLowerCase() === servicioSlug);
+      insumoSelect.innerHTML = '<option value="">Selecciona insumo</option>';
+      (options.length ? options : INSUMOS_DB).forEach((ins) => {
+        const opt = document.createElement('option');
+        opt.value = ins.id;
+        const svc = ins.servicio_nombre ? ` (${ins.servicio_nombre})` : '';
+        opt.textContent = ins.name + svc + ' - $' + (ins.price || 0).toLocaleString('es-CL');
+        opt.dataset.price = ins.price;
+        opt.dataset.name = ins.name;
+        insumoSelect.appendChild(opt);
+      });
+    }
+
+    function renderTrabajos() {
+      trabajosList.innerHTML = '';
+      if (!trabajos.length) {
+        const tr = document.createElement('tr');
+        tr.id = 'trabajosEmpty';
+        tr.innerHTML = '<td colspan="3" class="text-muted text-center">Sin trabajos agregados.</td>';
+        trabajosList.appendChild(tr);
+        return;
+      }
+      trabajos.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.dataset.id = item.id;
+        tr.innerHTML = `
+          <td>${item.name}</td>
+          <td class="text-end">$${(item.price || 0).toLocaleString('es-CL')}</td>
+          <td class="text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger remove-trabajo">Quitar</button>
+          </td>
+        `;
+        trabajosList.appendChild(tr);
+      });
+    }
+
+    function renderInsumos() {
+      insumosList.innerHTML = '';
+      if (!insumos.length) {
+        const tr = document.createElement('tr');
+        tr.id = 'insumosEmpty';
+        tr.innerHTML = '<td colspan="3" class="text-muted text-center">Sin insumos agregados.</td>';
+        insumosList.appendChild(tr);
+        return;
+      }
+      insumos.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.dataset.id = item.id;
+        tr.innerHTML = `
+          <td>${item.name}</td>
+          <td class="text-end">$${(item.price || 0).toLocaleString('es-CL')}</td>
+          <td class="text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger remove-insumo">Quitar</button>
+          </td>
+        `;
+        insumosList.appendChild(tr);
+      });
+    }
+
+    function renderDetalle() {
+      detalleList.innerHTML = '';
+      const allItems = [
+        ...trabajos.map(t => ({ tipo: 'Trabajo', name: t.name, price: t.price })),
+        ...insumos.map(i => ({ tipo: 'Insumo', name: i.name, price: i.price })),
+      ];
+      if (!allItems.length) {
+        const tr = document.createElement('tr');
+        tr.id = 'detalleEmpty';
+        tr.innerHTML = '<td colspan="2" class="text-muted text-center">Agrega trabajos e insumos para ver el detalle.</td>';
+        detalleList.appendChild(tr);
+      } else {
+        allItems.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${item.tipo}: ${item.name}</td><td class="text-end">$${(item.price || 0).toLocaleString('es-CL')}</td>`;
+          detalleList.appendChild(tr);
+        });
+      }
+
+      const trabajosTotal = trabajos.reduce((acc, t) => acc + (t.price || 0), 0);
+      const insumosTotal = insumos.reduce((acc, i) => acc + (i.price || 0), 0);
+      // Neto usa solo trabajos e insumos ingresados. El campo base se usa como respaldo cuando no hay trabajos.
+      const neto = trabajosTotal + insumosTotal;
+      const iva = Math.round(neto * 0.19);
+      const total = neto + iva;
+
+      totalInsumosTxt.textContent = formatCLP(insumosTotal);
+      netoTxt.textContent = formatCLP(neto);
+      ivaTxt.textContent = formatCLP(iva);
+      totalFinalTxt.textContent = formatCLP(total);
+
+      insumosJsonInput.value = JSON.stringify(insumos);
+      trabajosJsonInput.value = JSON.stringify(trabajos);
+    }
+
+    addTrabajoBtn.addEventListener('click', () => {
+      const name = (trabajoDescInput.value || '').trim();
+      const price = parseInt(trabajoPrecioInput.value || '0', 10);
+      if (!name || isNaN(price)) return;
+      const id = Date.now().toString(16) + Math.random().toString(16).slice(2);
+      trabajos.push({ id, name, price: Math.max(price, 0) });
+      trabajoDescInput.value = '';
+      trabajoPrecioInput.value = '';
+      renderTrabajos();
+      renderDetalle();
+    });
+
+    addInsumoBtn.addEventListener('click', () => {
+      const opt = insumoSelect.options[insumoSelect.selectedIndex];
+      if (!opt || !opt.dataset.price) return;
+      const price = parseInt(opt.dataset.price, 10) || 0;
+      const name = opt.dataset.name || opt.textContent;
+      const id = opt.value || (Date.now().toString() + Math.random().toString(16).slice(2));
+      insumos.push({ id, name, price: Math.max(price, 0) });
+      renderInsumos();
+      renderDetalle();
+    });
+
+    trabajosList.addEventListener('click', (e) => {
+      const btn = e.target.closest('.remove-trabajo');
+      if (!btn) return;
+      const row = btn.closest('tr');
+      const id = row && row.dataset.id;
+      trabajos = trabajos.filter(t => t.id !== id);
+      renderTrabajos();
+      renderDetalle();
+    });
+
+    insumosList.addEventListener('click', (e) => {
+      const btn = e.target.closest('.remove-insumo');
+      if (!btn) return;
+      const row = btn.closest('tr');
+      const id = row && row.dataset.id;
+      insumos = insumos.filter(i => i.id !== id);
+      renderInsumos();
+      renderDetalle();
+    });
+
+    populateSelect();
+    renderTrabajos();
+    renderInsumos();
+    renderDetalle();
+  })();
+</script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,206 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Servicios</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <style>
+    :root { --serv-accent: rgb(1, 20, 96); }
+    .serv-hero {
+      position: relative;
+      min-height: 55vh;
+      display: grid;
+      align-items: center;
+      padding: 64px 0;
+      color: #fff;
+      background: linear-gradient(115deg, rgba(0,21,97,0.92), rgba(0,21,97,0.65)), url("{% static 'menu/img/calllderahd.webp' %}") center/cover no-repeat;
+      overflow: hidden;
+    }
+    .serv-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.14), transparent 45%);
+      pointer-events: none;
+    }
+    .breadcrumb-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.24);
+      font-weight: 600;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.22);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .serv-title { font-size: clamp(2rem, 3vw, 2.8rem); font-weight: 800; line-height: 1.2; }
+    .serv-lead { opacity: 0.95; max-width: 760px; }
+    .serv-card {
+      border: none;
+      border-radius: 18px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: #fff;
+    }
+    .serv-card:hover { transform: translateY(-3px); box-shadow: 0 16px 36px rgba(0,0,0,0.12); }
+    .serv-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(1,20,96,0.08); color: var(--serv-accent);
+      font-weight: 800; display: inline-flex; align-items: center; justify-content: center;
+    }
+  </style>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+  {% include 'menu/partials/navbar.html' %}
+
+  <main class="flex-grow-1">
+    <section class="serv-hero">
+      <div class="container position-relative text-center">
+        <div class="breadcrumb-pill mx-auto mb-3">
+          <a href="{% url 'index' %}" class="text-white text-decoration-none">Inicio</a>
+          <span class="text-white-50">/</span>
+          <span class="text-white">Servicios</span>
+        </div>
+        <div class="chip mb-3">Servicios</div>
+        <h1 class="serv-title mb-2">Soluciones integrales para tu edificio.</h1>
+        <p class="serv-lead mb-0">Mantenimiento, emergencias y proyectos con cobertura nacional.</p>
+      </div>
+    </section>
+
+    <section id="servicios" class="container my-5" style="max-width: 1180px;">
+      {% if request.user.is_authenticated %}
+        {% if request.user.is_staff or request.user.is_superuser %}
+          <div class="mb-3">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-link p-0 text-decoration-none">&larr; Volver a administrar</a>
+          </div>
+        {% endif %}
+      {% endif %}
+      <div class="text-center mb-4">
+        <p class="text-uppercase fw-bold text-secondary mb-1">Catálogo</p>
+        <h2 class="fw-bold">Nuestros servicios</h2>
+        <p class="text-muted mb-0">Mantención preventiva y correctiva para que tus equipos funcionen siempre.</p>
+      </div>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% if servicios %}
+          {% for s in servicios %}
+            <div class="col">
+              <article class="serv-card h-100 p-3">
+                <div class="d-flex flex-column h-100">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="serv-icon">{{ forloop.counter }}</div>
+                    {% if s.publicado %}<span class="badge text-bg-success">Publicado</span>{% endif %}
+                  </div>
+                  <h5 class="fw-bold">{{ s.titulo }}</h5>
+                  {% if s.resumen %}
+                    <p class="text-muted mb-3">{{ s.resumen }}</p>
+                  {% endif %}
+                  <div class="mt-auto">
+                    <button
+                      class="btn btn-primary btn-sm w-100"
+                      data-bs-toggle="modal"
+                      data-bs-target="#servicioModal-{{ s.slug|default:s.id }}"
+                    >
+                      Ver más
+                    </button>
+                  </div>
+                </div>
+              </article>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted text-center">No hay servicios publicados aún.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    {% if servicios %}
+      {% for s in servicios %}
+        <div class="modal fade servicio-modal" id="servicioModal-{{ s.slug|default:s.id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-body p-0">
+                <div class="row g-0 align-items-stretch">
+                  <div class="col-lg-7 servicio-gallery">
+                    <div id="servicioCarousel-{{ s.slug|default:s.id }}" class="carousel slide h-100" data-bs-ride="carousel">
+                      <div class="carousel-inner h-100">
+                        {% if s.imagenes.all %}
+                          {% for img in s.imagenes.all %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %} h-100">
+                              <img src="{{ img.imagen.url }}" class="d-block w-100 h-100 object-cover" alt="{{ img.alt|default:s.titulo }}">
+                            </div>
+                          {% endfor %}
+                        {% else %}
+                          <div class="carousel-item active h-100">
+                            <img src="{% static 'menu/img/caldera1.jpg' %}" class="d-block w-100 h-100 object-cover" alt="{{ s.titulo }}">
+                          </div>
+                        {% endif %}
+                      </div>
+                      {% if s.imagenes.all|length > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#servicioCarousel-{{ s.slug|default:s.id }}" data-bs-slide="prev">
+                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#servicioCarousel-{{ s.slug|default:s.id }}" data-bs-slide="next">
+                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Siguiente</span>
+                        </button>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="col-lg-5 p-4 p-lg-5">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                      <div>
+                        <p class="text-uppercase text-muted small mb-1">Servicio</p>
+                        <h4 class="mb-0">{{ s.titulo }}</h4>
+                      </div>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    {% if s.resumen %}
+                      <p class="text-muted">{{ s.resumen }}</p>
+                    {% endif %}
+                    {% if s.point_list %}
+                      <ul class="list-unstyled modal-points">
+                        {% for punto in s.point_list %}
+                          <li>
+                            <span class="check text-primary">✓</span>
+                            <span>{{ punto }}</span>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                    <div class="d-grid mt-4">
+                      <a href="{% url 'contacto' %}" class="btn btn-primary">Solicitar información</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+  </main>
+  {% include 'menu/partials/footer.html' %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'menu/js/tarjetas.js' %}"></script>
+</body>
+</html>

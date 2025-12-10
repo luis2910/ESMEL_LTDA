@@ -1,0 +1,171 @@
+{% load static %}
+<nav class="site-navbar">
+  <div class="navbar-top">
+    <div class="navbar-top__content">
+      <div class="navbar-top__group">
+        <a class="top-link" href="mailto:fmella.fmservicios@gmail.com">
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+            <path d="M3 5h18v14H3z"></path>
+            <path d="M3 7l9 6 9-6" class="line"></path>
+          </svg>
+          <span>fmella.fmservicios@gmail.com</span>
+        </a>
+        <a class="top-link" href="tel:+56932005633">
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+            <path d="M6.6 2.4l3 1a1 1 0 01.7 1.1l-.5 3.1a1 1 0 01-.9.8 9.6 9.6 0 004.1 4.1 1 1 0 01.8-.9l3.1-.5a1 1 0 011.1.7l1 3a1 1 0 01-.5 1.2A13.2 13.2 0 013 6.9a1 1 0 01.5-1.2l3.1-1a1 1 0 01.7 0z"></path>
+          </svg>
+          <span>+56932005633</span>
+        </a>
+      </div>
+      <div class="navbar-top__group navbar-top__group--right">
+        <span class="top-link">
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7v5l3 2"></path>
+          </svg>
+          <span>Lun - Vier: 8:30 - 18:00. Emergencias 24 Horas.</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="navbar-main">
+    <div class="navbar-main__container">
+      <a href="{% url 'index' %}" class="navbar-brand" aria-label="FM Servicios Generales">
+        <img src="{% static 'menu/img/logo.jpeg' %}" alt="FM" class="brand-logo">
+        <div class="brand-text">
+          <span class="brand-title">FM SERVICIOS</span>
+          <span class="brand-subtitle">Servicios Generales LTDA.</span>
+        </div>
+      </a>
+
+      <button
+        class="navbar-toggle"
+        id="navbarMenuToggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="navbarMenu"
+        aria-label="Abrir menú de navegación"
+      >
+        <span class="navbar-toggle__bars" aria-hidden="true"></span>
+      </button>
+
+      <div class="navbar-nav" id="navbarMenu" role="navigation" aria-label="Menu principal">
+        <div class="navbar-links">
+          <a href="{% url 'index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}is-active{% endif %}">Inicio</a>
+          <a href="{% url 'nosotros' %}" class="nav-link {% if request.resolver_match.url_name == 'nosotros' %}is-active{% endif %}">Nosotros</a>
+          <a href="{% url 'servicios' %}" class="nav-link {% if request.resolver_match.url_name == 'servicios' %}is-active{% endif %}">Servicios</a>
+          <a href="{% url 'contacto' %}" class="nav-link {% if request.resolver_match.url_name == 'contacto' %}is-active{% endif %}">Contacto</a>
+          {% if request.user.is_authenticated %}
+            {% if request.user.is_staff or request.user.is_superuser %}
+              <a href="{% url 'admin_dashboard' %}" class="nav-link">Administrar</a>
+            {% elif request.user.rol == 'TECNICO' %}
+              <a href="{% url 'tecnicos_panel' %}" class="nav-link">Mi agenda</a>
+            {% endif %}
+          {% endif %}
+        </div>
+        <div class="navbar-actions">
+          <button
+            type="button"
+            class="icon-btn"
+            id="navbarProfileBtn"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="loginOverlay"
+            data-logged="{{ request.user.is_authenticated|yesno:'1,0' }}"
+          >
+            <span class="visually-hidden">
+              {% if request.user.is_authenticated %}Abrir panel de usuario{% else %}Abrir formulario de acceso{% endif %}
+            </span>
+            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+              <circle cx="12" cy="7" r="4"></circle>
+              <path d="M4 20c0-3.5 3.5-6.5 8-6.5s8 3 8 6.5" fill="none"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="login-overlay" id="loginOverlay" aria-hidden="true">
+  <div class="login-overlay__backdrop" data-close-overlay></div>
+  <div class="login-overlay__panel" role="dialog" aria-modal="true" aria-labelledby="loginOverlayTitle">
+    <button type="button" class="login-overlay__close" id="loginOverlayClose" aria-label="Cerrar panel">
+      &times;
+    </button>
+
+    {% if request.user.is_authenticated %}
+      <p class="text-muted small mb-1">Sesión iniciada</p>
+      <h2 id="loginOverlayTitle" class="h4 mb-3">Hola, {{ request.user.first_name|default:request.user.username }}</h2>
+      <div class="d-grid gap-2 mb-3">
+        <a href="{% url 'perfil' %}" class="btn btn-primary">Ir a mi perfil</a>
+        <a href="{% url 'logout' %}" class="btn btn-outline-secondary">Cerrar sesión</a>
+      </div>
+    {% else %}
+      <p class="text-muted small mb-1">Accede a tu cuenta</p>
+      <h2 id="loginOverlayTitle" class="h4 mb-3">Inicia sesión</h2>
+      <form method="post" action="{% url 'login' %}" class="login-overlay__form">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="overlay_username" class="form-label">Usuario o correo</label>
+          <input type="text" class="form-control" id="overlay_username" name="username" placeholder="Ingresa tu usuario o correo" required autocomplete="username">
+        </div>
+        <div class="mb-3">
+          <label for="overlay_password" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="overlay_password" name="password" placeholder="Ingresa tu contraseña" required autocomplete="current-password">
+        </div>
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
+      </form>
+      <div class="text-center mt-3">
+        <a href="{% url 'password_reset' %}" class="link-secondary d-inline-block mb-2">¿Olvidaste tu contraseña?</a>
+        <div>
+          <a href="{% url 'registro' %}" class="btn btn-outline-secondary w-100">Registrarme</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script src="{% static 'menu/js/navbar.js' %}?v=20241205" defer></script>
+<style>
+  .toast-stack-global {
+    position: fixed;
+    top: 72px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 4000;
+  }
+  .toast-green {
+    background: #16a34a;
+    color: #fff;
+    padding: 16px 18px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 800;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    min-width: 280px;
+    max-width: 460px;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+</style>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const alerts = Array.from(document.querySelectorAll(".alert"));
+    if (!alerts.length) return;
+    const container = document.createElement("div");
+    container.className = "toast-stack-global";
+    document.body.appendChild(container);
+    alerts.forEach(function (al) {
+      const toast = document.createElement("div");
+      toast.className = "toast-green";
+      toast.textContent = (al.textContent || "").trim();
+      container.appendChild(toast);
+      setTimeout(function () { toast.remove(); }, 6000);
+    });
+    alerts.forEach(function (al) { al.remove(); });
+  });
+</script>

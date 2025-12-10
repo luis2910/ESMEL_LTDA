@@ -1,0 +1,11 @@
+Hola {{ user.get_full_name|default:user.username }},
+
+Tu código de verificación es: {{ code }}
+Este código vence en {{ minutes }} minutos.
+
+También puedes aprobar con un clic:
+{{ approve_url }}
+
+Si no intentaste iniciar sesión, ignora este mensaje.
+
+— {{ site_name }}

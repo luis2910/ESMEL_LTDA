@@ -1,0 +1,112 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Editar visita</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'menu/css/style.css' %}?v=20241205">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+{% include 'menu/partials/navbar.html' %}
+
+<main class="container my-5 flex-grow-1">
+  <div class="mb-3">
+    <a href="{% url 'agenda_visitas' %}" class="btn btn-link p-0 text-decoration-none">&larr; Volver a la agenda</a>
+  </div>
+
+  <section class="bg-white rounded shadow-sm p-4">
+    <h1 class="h4 mb-3">Editar visita</h1>
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+      <div class="col-md-6">
+        <label class="form-label">Cliente / Comunidad *</label>
+        <input type="text" name="cliente" value="{{ visita.cliente }}" class="form-control" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Correo</label>
+        <input type="email" name="correo" value="{{ visita.correo }}" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Fecha *</label>
+        <input type="date" name="fecha" value="{{ visita.fecha|date:'Y-m-d' }}" class="form-control" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Hora</label>
+        <input type="time" name="hora" value="{{ visita.hora|time:'H:i' }}" class="form-control">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Técnico *</label>
+        <select name="tecnico" class="form-select" required>
+          <option value="">Selecciona un técnico</option>
+          {% for tec in tecnicos %}
+            <option value="{{ tec.slug }}" {% if tec.slug == visita.tecnico_slug %}selected{% endif %}>{{ tec.nombre }} &mdash; {{ tec.especialidad }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Región</label>
+        <select name="region" class="form-select" id="editRegion">
+          <option value="">Selecciona región</option>
+          {% for nombre in regiones %}
+            <option value="{{ nombre }}" {% if nombre == visita.region %}selected{% endif %}>{{ nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Comuna</label>
+        <select name="comuna" class="form-select" id="editComuna" data-initial="{{ visita.comuna }}">
+          <option value="">Selecciona comuna</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Dirección</label>
+        <input type="text" name="direccion" value="{{ visita.direccion }}" class="form-control">
+      </div>
+      <div class="col-12">
+        <label class="form-label">Notas</label>
+        <textarea name="notas" rows="3" class="form-control">{{ visita.notas }}</textarea>
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary">Guardar cambios</button>
+        <a href="{% url 'agenda_visitas' %}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </section>
+</main>
+
+{% include 'menu/partials/footer.html' %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function () {
+    const regionesData = JSON.parse('{{ regiones_json|escapejs }}');
+    const regionSelect = document.getElementById("editRegion");
+    const comunaSelect = document.getElementById("editComuna");
+    if (!regionSelect || !comunaSelect) return;
+    function renderComunas(selected) {
+      const region = regionSelect.value;
+      const comunas = regionesData[region] || [];
+      comunaSelect.innerHTML = '<option value="">Selecciona comuna</option>';
+      comunas.forEach(function (nombre) {
+        const opt = document.createElement("option");
+        opt.value = nombre;
+        opt.textContent = nombre;
+        if (nombre === selected) {
+          opt.selected = true;
+        }
+        comunaSelect.appendChild(opt);
+      });
+      comunaSelect.disabled = comunas.length === 0;
+    }
+    renderComunas(comunaSelect.getAttribute("data-initial") || "");
+    regionSelect.addEventListener("change", function () {
+      renderComunas("");
+    });
+  })();
+</script>
+</body>
+</html>
+
